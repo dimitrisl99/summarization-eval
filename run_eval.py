@@ -63,13 +63,23 @@ Respond ONLY with valid JSON in this exact format, with no other text before or 
         return {"score": None, "reasoning": "PARSE_ERROR"}
 
 # Test with just the first text in our golden set
-first_item = golden_set[0]
-summary = summarize_text(first_item["text"])
-judge_result = judge_summary(first_item["text"], summary)
+results = []
 
-print("ORIGINAL TEXT:")
-print(first_item["text"])
-print("\nSUMMARY:")
-print(summary)
-print("\nJUDGE SCORE:", judge_result["score"])
-print("JUDGE REASONING:", judge_result["reasoning"])
+for item in golden_set:
+    print(f"Processing item {item['id']}...")
+
+    summary = summarize_text(item["text"])
+    judge_result = judge_summary(item["text"], summary)
+
+    results.append({
+        "id": item["id"],
+        "topic": item["topic"],
+        "summary": summary,
+        "score": judge_result["score"],
+        "reasoning": judge_result["reasoning"],
+    })
+
+# Print a simple report
+print("\n--- RESULTS ---")
+for r in results:
+    print(f"ID {r['id']} ({r['topic']}): score={r['score']} - {r['reasoning']}")
