@@ -83,3 +83,19 @@ for item in golden_set:
 print("\n--- RESULTS ---")
 for r in results:
     print(f"ID {r['id']} ({r['topic']}): score={r['score']} - {r['reasoning']}")
+
+
+# Calculate average score
+average_score = sum(r["score"] for r in results) / len(results)
+print(f"\nAverage score: {average_score:.2f}")
+
+# Save results as baseline
+baseline_data = {
+    "average_score": average_score,
+    "results": results,
+}
+
+with open("baseline.json", "w", encoding="utf-8") as f:
+    json.dump(baseline_data, f, indent=2)
+
+print("Baseline saved to baseline.json")
