@@ -75,9 +75,28 @@ eval_project/
   single item. This isn't a flaw in the eval — it reflects that the texts used are
   relatively straightforward for the model. A more challenging or adversarial
   golden set would likely surface more variation in scores.
+- When simulating a regression by increasing the generator's temperature to an
+  extreme value (1.8-2.0), a **single evaluation run was not a reliable signal** —
+  repeated runs at the same temperature produced meaningfully different average
+  scores (e.g. 4.60 vs 4.80) purely due to the generator's own randomness. This
+  was fixed by running the regression scenario multiple times (3 runs) and
+  averaging across runs, which produced a much more stable signal.
+- At temperature=1.8, the average score dropped by ~0.2-0.3 (out of 5) versus
+  baseline, which was borderline against the initial threshold. At temperature=2.0
+  (max), the drop increased to ~0.43, clearly exceeding the threshold and
+  correctly triggering the "regression detected" failure path (exit code 1). This
+  confirms the pipeline can distinguish a real quality drop from normal run-to-run
+  noise, and that `llama-3.1-8b-instant` is fairly robust to sampling randomness
+  on this summarization task even under high temperature.
+- Threshold was set to 0.25 (out of a 1-5 scale) based on empirical observation
+  of the noise floor across repeated baseline-temperature runs, not chosen
+  arbitrarily.
+
 ## Status
 
-Work in progress — next steps include testing whether the pipeline correctly
-detects a simulated regression (e.g. a degraded prompt or higher temperature),
-and wiring the eval into a CI workflow (GitHub Actions) to block deploys below
-a score threshold.
+Core eval pipeline complete and validated: baseline tracking, LLM-as-judge
+scoring, and regression detection (including multi-run averaging to reduce
+noise) all confirmed working, with both a "pass" and a "fail" scenario observed.
+
+Next step: wire this into a GitHub Actions workflow so the eval runs
+automatically and blocks a deploy if a regression is detected.
